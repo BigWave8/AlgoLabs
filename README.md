@@ -7,4 +7,4 @@ Conferense, Insertion and Heap sorts, read from csv
 Hamsters, Quick select
 
 ## Lab3:
-Govern, BFS
+Govern, DFS
