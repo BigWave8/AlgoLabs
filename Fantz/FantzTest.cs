@@ -85,5 +85,15 @@ namespace Fantz
 
             Assert.AreEqual(-1, Launcher.Answer);
         }
+        [Test]
+        public void Algorithm_3N_ExpectedMinus50()
+        {
+            string pathTest = @"D:\projects\Algo\Fantz\fantz_test9.txt";
+            Launcher.Bits = Launcher.ReadWithFile(pathTest);
+
+            Launcher.Answer = Launcher.Algorithm();
+
+            Assert.AreEqual(50, Launcher.Answer);
+        }
     }
 }

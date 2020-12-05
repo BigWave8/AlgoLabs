@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Fantz
 {
@@ -20,32 +21,39 @@ namespace Fantz
         }
         public static int Algorithm()
         {
-            int answer = 0;
-            Answer = int.MaxValue;
-            int freeBits = Bits.Length;
             Dictionary<long, string> substring = new Dictionary<long, string>();
+            Dictionary<int, int> memorized = new Dictionary<int, int>();
             SubstringsCreator(substring);
-            SearchBinarySubsting(substring, freeBits, answer);
-            if (Answer == int.MaxValue)
+            if (Bits[0] == '0')
                 return -1;
-
-            return Answer;
+            SearchBinarySubsting(substring, memorized);
+            return memorized[Bits.Length];
         }
-        private static void SearchBinarySubsting(Dictionary<long, string> subStrings, int freeBits, int answer)
+        private static void SearchBinarySubsting(Dictionary<long, string> subStrings, Dictionary<int, int> memorized)
         {
-            foreach (var subString in subStrings)
+            for (int length = 1; length <= Bits.Length; length++)
             {
-                if (subString.Value.Length <= freeBits)
+                if (Bits[Bits.Length - length] == '0')
                 {
-                    if (subStrings.ContainsValue(Bits.Substring(Bits.Length - freeBits, subString.Value.Length)))
+                    memorized.Add(length, -1);
+                    continue;
+                }
+                if (subStrings.ContainsValue(Bits.Substring(Bits.Length - length, length)))
+                {
+                    memorized.Add(length, 1);
+                    continue;
+                }
+                memorized.Add(length, int.MaxValue);
+                for ( int leftSubLength = 1; leftSubLength < length; leftSubLength++)
+                {
+                    string leftSubString = Bits.Substring(Bits.Length - length, leftSubLength);
+                    if (subStrings.ContainsValue(leftSubString) && memorized[length - leftSubLength] > 0)
                     {
-                        answer++;
-                        freeBits -= subString.Value.Length;
-                        SearchBinarySubsting(subStrings, freeBits, answer);
-                        if (freeBits == 0 && answer < Answer)
-                            Answer = answer;
+                        memorized[length] = Math.Min(memorized[length], memorized[length - leftSubLength] + 1);
                     }
                 }
+                if (memorized[length] == int.MaxValue)
+                    memorized[length] = -1;
             }
         }
         private static void SubstringsCreator(Dictionary<long, string> subStrings)
