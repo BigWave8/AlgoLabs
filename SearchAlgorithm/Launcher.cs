@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SearchAlgorithm
 {
@@ -14,21 +12,17 @@ namespace SearchAlgorithm
         public static int[] Answers { get; set; }
         static void Main(string[] args)
         {
-            const string pathIn = @"D:\projects\Algo\SearchAlgorithm\string_test5.txt";
+            const string pathIn = @"D:\projects\Algo\SearchAlgorithm\string_test6.txt";
             const string pathOut = @"D:\projects\Algo\SearchAlgorithm\string_out.txt";
             ReadWithFile(pathIn);
             Answers = (int[])BruteForceAlgorithm().ToArray().Clone();
+            //Answers = (int[])BoyerMooreAlgorithm().ToArray().Clone();
             WriteInFile(pathOut);
-        }
-
-        public static void LaunchAlgorithms()
-        {
-            
         }
         public static List<int> BruteForceAlgorithm()
         {
             List<int> answers = new List<int>();
-            if (Pattern.Length > InputString.Length)
+            if (Pattern.Length > InputString.Length || Pattern.Length == 0 || InputString.Length == 0)
             {
                 answers.Add(-1);
                 return answers;
@@ -51,33 +45,54 @@ namespace SearchAlgorithm
         }
         public static List<int> BoyerMooreAlgorithm()
         {
+            Dictionary<char, int> skips = new Dictionary<char, int>();
+            CreatePassTable(skips);
             List<int> answers = new List<int>();
-            if (Pattern.Length > InputString.Length)
+            if (Pattern.Length > InputString.Length || Pattern.Length == 0 || InputString.Length == 0)
             {
                 answers.Add(-1);
                 return answers;
             }
-            int skip;
-            for (int i = 0; i <= InputString.Length - Pattern.Length; i+=skip)
+            for (int i = 0; i <= InputString.Length - Pattern.Length;)
             {
-                skip = 0;
                 for (int j = Pattern.Length - 1; j >= 0; j--)
                 {
                     if (InputString[i + j] != Pattern[j])
                     {
-                        skip = Math.Max(1, j);
+                        if (skips.ContainsKey(InputString[i + j]))
+                        {
+                            i += skips[InputString[i + Pattern.Length - 1]];
+                        }
+                        else
+                        {
+                            i += Pattern.Length;
+                        }
                         break;
                     }
-                }
-                if (skip == 0)
-                {
-                    answers.Add(i);
-                    skip = Pattern.Length;
+                    if (j == 0)
+                    {
+                        answers.Add(i);
+                        i++;
+                    }
                 }
             }
             if (answers.Count == 0)
                 answers.Add(-1);
             return answers;
+        }
+        private static void CreatePassTable(Dictionary<char, int> skips)
+        {
+            for (int i = 1; i < Pattern.Length; i++)
+            {
+                if (!skips.ContainsKey(Pattern[Pattern.Length - i - 1]))
+                {
+                    skips[Pattern[Pattern.Length - i - 1]] = i;
+                }
+            }
+            if (!skips.ContainsKey(Pattern[Pattern.Length - 1]))
+            {
+                skips[Pattern[Pattern.Length - 1]] = Pattern.Length;
+            }
         }
         public static void ReadWithFile(string path)
         {
@@ -93,9 +108,16 @@ namespace SearchAlgorithm
         {
             using (StreamWriter sr = new StreamWriter(path, false))
             {
-                foreach (var answer in Answers)
+                if (Answers[0] == -1)
                 {
-                    sr.WriteLine($"{answer} --> {answer + Pattern.Length}" );
+                    sr.WriteLine("Not found");
+                }
+                else
+                {
+                    foreach (var answer in Answers)
+                    {
+                        sr.WriteLine($"{answer} --> {answer + Pattern.Length}");
+                    }
                 }
                 sr.Close();
             }
